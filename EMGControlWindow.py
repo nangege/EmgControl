@@ -2,6 +2,7 @@ import sys
 from time import sleep
 import timer
 import threading
+import pylab as pl
 
 import numpy as np
 from matplotlib.figure import Figure
@@ -26,7 +27,7 @@ from devDaq import Daq
 
 class DaqThread(QObject,threading.Thread):
     daqCompleted = QtCore.pyqtSignal(int)
-    def __init__(self,devName = "Dev1/ai0:3",sampleNum = 400,sampleRate = 400.0,channelNum = 4,parent = None):
+    def __init__(self,devName = "Dev1/ai0:3",sampleNum = 800,sampleRate = 800.0,channelNum = 4,parent = None):
         super(QObject,self).__init__(parent)
         threading.Thread.__init__(self)
         self.devName = devName
@@ -75,7 +76,7 @@ class EMGMainWindow(QMainWindow,Ui_MainWindow):
         super(EMGMainWindow,self).__init__(parent = None)
         self.setupUi(self)
         
-        self.fig = Figure((8.0, 8.0), dpi= 80)
+        self.fig = Figure((8.0, 8.0), dpi= 80,tight_layout = True)
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self.frame)
         self.canvas.setFocusPolicy(Qt.StrongFocus)   
@@ -92,13 +93,15 @@ class EMGMainWindow(QMainWindow,Ui_MainWindow):
         
         self.numPerChannel = self.daq.sampleNum/self.daq.channelNum
         
-        self.numToShow = 400
+        self.numToShow = 1600
         
         self.data = [[] for i in range(self.daq.channelNum)]        
+        self.allData = [[] for i in range(self.daq.channelNum)]  
         
         QObject.connect(self.pushButton,SIGNAL("clicked()"),self.start)
         QObject.connect(self.pushButton_2,SIGNAL("clicked()"),self.daq.stopDaq)
         QObject.connect(self.daq,SIGNAL("daqCompleted(int)"),self.acquireData)
+        QObject.connect(self.fullDataButton,SIGNAL("clicked()"),self.showFullData)
         
     def start(self):
         self.daq.start()
@@ -112,21 +115,28 @@ class EMGMainWindow(QMainWindow,Ui_MainWindow):
             if len(self.data[i]) >= self.numToShow:
                 self.data[i] = self.data[i][self.numPerChannel:self.numToShow]
             self.data[i].extend(data[i*self.numPerChannel:(1 + i)*self.numPerChannel])
+            self.allData[i].extend(data[i*self.numPerChannel:(1 + i)*self.numPerChannel])
+            
         if len(self.data[0]) >= self.numToShow:
             self.upDataFig()
+            
+    def showFullData(self):
+        print "Show Full Data"
+        for i in range(len(self.allData)):
+            pl.plot(range(len(self.allData[i])),self.allData[i])
+        pl.show()
             
     def upDataFig(self):
         
         num = len(self.data)
         #num = 1
         self.axes.cla()
-        #self.axes.axis('off')
         
         self.axes.set_ylim(0,num)
-        self.axes.set_xlim(0,self.numToShow/2)
+        self.axes.set_xlim(0,self.numToShow/4)
         
         for i in range(num):
-            self.axes.plot(range(len(self.data[i])/2),[i + data/3.5 for data in self.data[i][0:len(self.data[i]):2]],color = 'red')
+            self.axes.plot(range(len(self.data[i])/4),[i + data/3.5 for data in self.data[i][0:len(self.data[i]):4]],color = 'red')
         
         #for i in range(num - 1):
             #self.axes.plot([1,self.numToShow],[ i + 1  for t in range(2)],color = 'black',linewidth = 2)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'C:\Users\Administrator\Desktop\EMGControl\qt.ui'
+# Form implementation generated from reading ui file 'C:\Users\Administrator\Desktop\EmgControl\qt.ui'
 #
-# Created: Fri Jan 10 13:59:59 2014
+# Created: Thu Jan 16 20:40:18 2014
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -45,8 +45,8 @@ class Ui_MainWindow(object):
         self.pushButton = QtGui.QPushButton(self.centralwidget)
         self.pushButton.setMinimumSize(QtCore.QSize(75, 75))
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Aparajita"))
-        font.setPointSize(18)
+        font.setFamily(_fromUtf8("Courier New"))
+        font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
         self.pushButton.setFont(font)
@@ -58,8 +58,8 @@ class Ui_MainWindow(object):
         self.pushButton_2 = QtGui.QPushButton(self.centralwidget)
         self.pushButton_2.setMinimumSize(QtCore.QSize(75, 75))
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Aparajita"))
-        font.setPointSize(18)
+        font.setFamily(_fromUtf8("Courier New"))
+        font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
         self.pushButton_2.setFont(font)
@@ -67,6 +67,18 @@ class Ui_MainWindow(object):
         self.pushButton_2.setFlat(True)
         self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
         self.horizontalLayout.addWidget(self.pushButton_2)
+        self.fullDataButton = QtGui.QPushButton(self.centralwidget)
+        self.fullDataButton.setMinimumSize(QtCore.QSize(0, 75))
+        font = QtGui.QFont()
+        font.setFamily(_fromUtf8("Courier New"))
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setItalic(False)
+        font.setWeight(75)
+        self.fullDataButton.setFont(font)
+        self.fullDataButton.setFlat(True)
+        self.fullDataButton.setObjectName(_fromUtf8("fullDataButton"))
+        self.horizontalLayout.addWidget(self.fullDataButton)
         self.verticalLayout.addLayout(self.horizontalLayout)
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -77,4 +89,5 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
         self.pushButton.setText(_translate("MainWindow", "Acquisition", None))
         self.pushButton_2.setText(_translate("MainWindow", "Stop", None))
+        self.fullDataButton.setText(_translate("MainWindow", "showFullData", None))
 

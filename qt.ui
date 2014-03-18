@@ -55,8 +55,8 @@
         </property>
         <property name="font">
          <font>
-          <family>Aparajita</family>
-          <pointsize>18</pointsize>
+          <family>Courier New</family>
+          <pointsize>12</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -85,8 +85,8 @@
         </property>
         <property name="font">
          <font>
-          <family>Aparajita</family>
-          <pointsize>18</pointsize>
+          <family>Courier New</family>
+          <pointsize>12</pointsize>
           <weight>75</weight>
           <bold>true</bold>
          </font>
@@ -96,6 +96,31 @@
         </property>
         <property name="text">
          <string>Stop</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="fullDataButton">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>75</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Courier New</family>
+          <pointsize>12</pointsize>
+          <weight>75</weight>
+          <italic>false</italic>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>showFullData</string>
         </property>
         <property name="flat">
          <bool>true</bool>

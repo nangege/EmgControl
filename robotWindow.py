@@ -1,5 +1,7 @@
+#utf-8
 import sys
 import vtk
+import time
 
 try:
     from PyQt4 import QtCore, QtGui
@@ -22,12 +24,15 @@ class robotWindow(QtGui.QWidget,Ui_robotWidget):
         super(robotWindow,self).__init__(parent = None)
         self.setupUi(self)
         
-        self.robot = palmModel()
+        self.robotModel = robotModel()
+        self.palm = palmModel()
+        self.robot = self.robotModel
+        #self.mirrorRobot = robotModel()
                
         self.vtkWidget = QVTKRenderWindowInteractor(self.robotWidget)
         self.ren = vtk.vtkRenderer()
         
-        lightPosition = [0,0,1]
+        lightPosition = [0,0,10]
         lightFocalPoint = [0,0,0]
         light = vtk.vtkLight()
         light.SetLightTypeToSceneLight()
@@ -71,24 +76,45 @@ class robotWindow(QtGui.QWidget,Ui_robotWidget):
         self.fingerTogether = []
         self.slideTogether = []
         
+        self.interval = 0
+        
         self.connect(self.palmModelCheckBox,SIGNAL("stateChanged(int)"),self.changeRobotModel)
+        self.connect(self.loadDataButton,SIGNAL('clicked()'),self.loadAction)
+        self.connect(self.animateButton,SIGNAL('clicked()'),self.animate) 
+        self.connect(self.stepOneButton,SIGNAL('pressed()'),self.moveArm) 
+        self.connect(self.resetButton,SIGNAL('pressed()'),self.reset) 
+        
+        self.armData = []
+        
+        self.headTo      = [1, 1,-1, 1,-1,-1, 1]   
+        self.mirroHeadTo = [-1,1, 1,-1, 1, 1, 1]
+        self.loadData('data.txt')
         
         self.ren.AddActor(self.robot.getAssembly())
+        #self.mirrorRobot.RotateX(180)
+        #self.mirrorRobot.assembly.SetPosition(-400,0,0)
+        #self.ren.AddActor(self.mirrorRobot.getAssembly())
         self.axes = vtk.vtkAxesActor()
         self.axes.SetTotalLength(100,100,100)
         center = self.ren.GetCenter()
         self.axes.SetPosition(0,0,0)
-        #self.ren.AddActor(self.axes)
         self.iren = self.vtkWidget.GetRenderWindow().GetInteractor()
         self.iren.Initialize()
+        self.reset()
+        
+    def reset(self):
+        camera = vtk.vtkCamera()
+        camera.SetPosition(0,0,1)
+        self.ren.SetActiveCamera(camera)
+        self.ren.ResetCamera()
         
     def changeRobotModel(self,isChecked):
         self.ren.RemoveActor(self.robot.getAssembly())
         if isChecked:
-            self.robot = palmModel()
+            self.robot = self.palm
             self.robot.setPosition(-20,-450,0)
         else:
-            self.robot = robotModel()
+            self.robot = self.robotModel
             self.setArmConnect()
         self.ren.AddActor(self.robot.getAssembly())
   
@@ -97,7 +123,55 @@ class robotWindow(QtGui.QWidget,Ui_robotWidget):
          
         self.setPalmConnect() 
         self.renderWindow.Render()
+        
+    def loadAction(self):
+        path = QtGui.QFileDialog.getOpenFileName(self,
+                    "Choose a Path to Index")
+        if path:
+            self.loadData(path)
+
+    def loadData(self,filePath):
+        file_object = open(filePath)
+        try:
+            all_the_text = file_object.read()
+            print all_the_text
+            data = all_the_text.split(',')
+            print data
+            print "Data Length",len(data)
+        finally:
+            file_object.close()
             
+        self.armData = []
+            
+        if len(data)%7 != 0:
+            print "Format Error,Change Data to Match Format"
+            data = data[len(data)/7*7]
+        
+        dataNum = len(data)/7
+        for i in range(7):
+            self.armData.append(map(float,data[i*dataNum:(i + 1)*dataNum]))
+        print self.armData
+        
+        print "Data Length:",len(self.armData)   
+        print "Data[2]:",self.armData[2]
+        
+                 
+    def animate(self):            
+        self.time = QTimer()
+        self.connect(self.time,SIGNAL('timeout()'),self.moveArm)
+        self.interval = 0
+        self.time.start(self.timeSpinbox.value())
+        
+    def moveArm(self):
+        self.robot.controlArm(map(lambda x,y:x[self.interval]*self.headTo[y],[self.armData[i] for i in range(7)],range(7)))
+        #self.mirrorRobot.controlArm(map(lambda x,y:x[self.interval]*self.mirroHeadTo[y],[self.armData[i] for i in range(7)],range(7)))
+        self.renderWindow.Render()
+        self.interval = self.interval + 1
+        if self.interval >= len(self.armData[0]):
+            self.disconnect(self.time,SIGNAL('timeout()'),self.moveArm)
+            self.time.stop()
+            print "Over"
+         
     def changeCheckBoxConnect(self):
         for slide in self.slideTogether:
             self.disconnect(slide,SIGNAL("valueChanged(int)"),self.setTogether)
@@ -136,6 +210,9 @@ class robotWindow(QtGui.QWidget,Ui_robotWidget):
         map(self.connectFun,self.fingerSender,[self.renderWindow.Render for i in range(6)])        
                    
 if __name__ == "__main__":
+    import sys
+    reload(sys)                       
+    sys.setdefaultencoding('utf-8')      
     app = QtGui.QApplication(sys.argv)
     window = robotWindow()
     window.show()
